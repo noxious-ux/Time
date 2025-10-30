@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Flipclock — Timezone aware</title>
+  <title>Flipclock — Timezone aware (browser timezone)</title>
 
   <!-- Orbitron for the clock digits -->
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
@@ -13,7 +13,6 @@
 
   <header class="site-header">
     <h1 id="site-title">flipclock</h1>
-    <button id="settings-btn" class="settings" title="Change location or preferences">⚙</button>
   </header>
 
   <main id="page">
@@ -23,7 +22,7 @@
     <div class="clearfix"></div>
 
     <ul id="usage">
-      <li class="selected">Tip: Click the gear to change location later. First-time visitors will be asked for a location so the clock can show your local time.</li>
+      <li class="selected">This version uses your browser's timezone automatically (no location prompt). Use the right-side toggle to switch between 12-hour and 24-hour display.</li>
     </ul>
   </main>
 
@@ -33,24 +32,11 @@
     <button id="btn-24">24-hour</button>
   </div>
 
-  <!-- modal for location input -->
-  <div id="location-modal" class="modal-backdrop" style="display:none" role="dialog" aria-modal="true">
-    <div class="modal" role="document">
-      <h3>Welcome — set your location</h3>
-      <p>Please enter your city, region or timezone so the clock can show your local time. Examples: "Paris", "New York", or "Europe/London".</p>
-      <input id="loc-input" type="text" placeholder="City, region or timezone (e.g. New York or Europe/London)" autocomplete="off" />
-      <div class="row">
-        <button id="loc-use">Use this</button>
-        <button id="loc-local" class="secondary">Use my browser timezone</button>
-      </div>
-      <div class="note">We try to resolve your input to a timezone using a public timezone list. No API keys required.</div>
-    </div>
-  </div>
-
   <audio id="flipclick" preload="auto">
     <source src="https://github.com/gokercebeci/flipclock/blob/master/js/plugins/flipclock/click.mp3?raw=true" type="audio/mpeg"/>
   </audio>
 
+  <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="script.js"></script>
 </body>
