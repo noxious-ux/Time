@@ -1,43 +1,12 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Flipclock — Timezone aware (browser timezone)</title>
-
-  <!-- Orbitron for the clock digits -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-  <link href="styles.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Flip Clock (HH:MM:SS)</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <header class="site-header">
-    <h1 id="site-title">flipclock</h1>
-  </header>
-
-  <main id="page">
-    <div id="container" aria-live="polite"></div>
-    <div id="ampm" class="ampm" aria-hidden="true">AM</div>
-
-    <div class="clearfix"></div>
-
-    <ul id="usage">
-      <li class="selected">This version uses your browser's timezone automatically (no location prompt). Use the right-side toggle to switch between 12-hour and 24-hour display.</li>
-    </ul>
-  </main>
-
-  <!-- 12/24 toggle -->
-  <div class="toggle-wrap" aria-hidden="false">
-    <button id="btn-12" class="active">12-hour</button>
-    <button id="btn-24">24-hour</button>
-  </div>
-
-  <audio id="flipclick" preload="auto">
-    <source src="https://github.com/gokercebeci/flipclock/blob/master/js/plugins/flipclock/click.mp3?raw=true" type="audio/mpeg"/>
-  </audio>
-
-  <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <div class="flip-clock" id="flipClock"></div>
   <script src="script.js"></script>
 </body>
 </html>
