@@ -3,10 +3,8 @@ function pad(n) {
 }
 
 function createDigit(digit) {
-  // Each digit has two halves: top and bottom
   const digitElem = document.createElement('div');
   digitElem.className = 'flip-digit';
-
   digitElem.innerHTML = `
     <div class="flip-inner">
       <div class="flip-half flip-top">${digit}</div>
@@ -29,7 +27,6 @@ function updateDigit(digitElem, newDigit) {
   const prevDigit = top.textContent;
 
   if (prevDigit !== newDigit) {
-    // Animate flip
     top.textContent = prevDigit;
     bottom.textContent = newDigit;
     digitElem.classList.remove('flip-animate');
@@ -44,7 +41,6 @@ function updateDigit(digitElem, newDigit) {
 }
 
 function renderClock(container) {
-  // Layout: [H][H]:[M][M]:[S][S]
   const groupOrder = [
     ['h1', 'h2'], 'colon1',
     ['m1', 'm2'], 'colon2',
@@ -52,7 +48,7 @@ function renderClock(container) {
   ];
   const groupElems = {};
 
-  groupOrder.forEach((group, i) => {
+  groupOrder.forEach((group) => {
     if (group === 'colon1' || group === 'colon2') {
       container.appendChild(createColon());
     } else {
@@ -70,17 +66,39 @@ function renderClock(container) {
   return groupElems;
 }
 
+function getISTDate() {
+  // Get current UTC time
+  const now = new Date();
+  // --- IST offset hardcoded here ---
+  now.setMinutes(now.getMinutes() + 330); // <--- This is where IST offset is added (line 49)
+  // ---------------------------------
+  const h = pad(now.getHours());
+  const m = pad(now.getMinutes());
+  const s = pad(now.getSeconds());
+  return { h, m, s };
+}
+
 function startFlipClock() {
   const clockContainer = document.getElementById('flipClock');
   clockContainer.innerHTML = '';
   const digits = renderClock(clockContainer);
 
-  function update() {
-    const now = new Date();
-    const h = pad(now.getHours());
-    const m = pad(now.getMinutes());
-    const s = pad(now.getSeconds());
+  // Optional: Display time zone label
+  let tzLabel = document.getElementById('tzLabel');
+  if (!tzLabel) {
+    tzLabel = document.createElement('div');
+    tzLabel.id = 'tzLabel';
+    tzLabel.style.textAlign = 'center';
+    tzLabel.style.color = '#10ffb1';
+    tzLabel.style.fontFamily = 'monospace';
+    tzLabel.style.fontSize = '1.1rem';
+    tzLabel.style.marginTop = '12px';
+    clockContainer.parentNode.appendChild(tzLabel);
+  }
+  tzLabel.textContent = 'IST (UTC+05:30)';
 
+  function update() {
+    const { h, m, s } = getISTDate();
     updateDigit(digits.h1, h[0]);
     updateDigit(digits.h2, h[1]);
     updateDigit(digits.m1, m[0]);
