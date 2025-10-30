@@ -1,5 +1,7 @@
-/* flipclock separated JS (depends on jQuery) */
-/* Provides timezone-aware flipclock with 12/24 toggle and first-run modal. */
+/* flipclock plugin + UI glue (no location modal)
+   - This version uses the browser timezone automatically.
+   - Only the 12/24 toggle remains (persisted).
+*/
 
 (function($) {
   var pluginName = 'flipclock';
@@ -58,7 +60,6 @@
         if (hour === 0) hour = 12;
       }
 
-      // produce same layout as original plugin: two-digit year offset like old plugin
       var tstr = methods.pad(year - 2000) + methods.pad(month) + methods.pad(day)
                  + methods.pad(hour) + methods.pad(minute) + methods.pad(second);
 
@@ -252,15 +253,13 @@
 
 
 /* -----------------------
-   UI glue (modal, storage, toggle)
+   UI glue (12/24 toggle only; browser timezone)
    ----------------------- */
 (function($){
-  var STORAGE_KEY = 'flipclock_seen_v1';
-  var TZ_KEY = 'flipclock_timezone_v1';
   var HOUR12_KEY = 'flipclock_hour12_v1';
 
+  // default to 12-hour but restore user's previous preference if present
   var prefs = { timezone: null, hour12: true };
-
   var storedHour12 = localStorage.getItem(HOUR12_KEY);
   if (storedHour12 !== null) prefs.hour12 = storedHour12 === '1';
 
@@ -280,97 +279,18 @@
   $('#btn-12').on('click', function(){ prefs.hour12 = true; localStorage.setItem(HOUR12_KEY,'1'); setToggleUI(); reinitClock(); });
   $('#btn-24').on('click', function(){ prefs.hour12 = false; localStorage.setItem(HOUR12_KEY,'0'); setToggleUI(); reinitClock(); });
 
-  var storedTz = localStorage.getItem(TZ_KEY);
-  if (storedTz) prefs.timezone = storedTz || null;
-
   var clockInitialized = false;
   function reinitClock() {
+    // timezone is left null: use browser local time
     if (!clockInitialized) {
-      $('#container').flipclock({ timezone: prefs.timezone, hour12: prefs.hour12 });
+      $('#container').flipclock({ timezone: null, hour12: prefs.hour12 });
       clockInitialized = true;
     } else {
-      $('#container').data('plugin_flipclock').updateSettings({ timezone: prefs.timezone, hour12: prefs.hour12 });
+      $('#container').data('plugin_flipclock').updateSettings({ timezone: null, hour12: prefs.hour12 });
     }
   }
 
-  // Show modal on first visit
-  if (!localStorage.getItem(STORAGE_KEY)) {
-    $('#location-modal').show();
-    setTimeout(function(){ $('#loc-input').focus(); }, 200);
-  } else {
-    reinitClock();
-  }
-
-  $('#loc-local').on('click', function(){
-    try {
-      var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      prefs.timezone = tz || null;
-    } catch (e) {
-      prefs.timezone = null;
-    }
-    localStorage.setItem(TZ_KEY, prefs.timezone || '');
-    localStorage.setItem(STORAGE_KEY, '1');
-    $('#location-modal').hide();
-    reinitClock();
-  });
-
-  $('#loc-use').on('click', function(){
-    var raw = $('#loc-input').val().trim();
-    if (!raw) { alert('Please type a city, region or timezone identifier (e.g. "Paris" or "Europe/London").'); return; }
-    resolveTimezone(raw);
-  });
-
-  $('#loc-input').on('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); $('#loc-use').trigger('click'); } });
-
-  function resolveTimezone(input) {
-    var q = input.toLowerCase().replace(/\s+/g,'_');
-    $('#loc-use').text('Resolving...').prop('disabled',true);
-    // If input contains a slash, try Intl validation first
-    if (input.indexOf('/') !== -1) {
-      try {
-        new Intl.DateTimeFormat('en-US',{ timeZone: input }).format();
-        setResolvedTimezone(input);
-        return;
-      } catch(e) { /* fall through */ }
-    }
-    fetch('https://worldtimeapi.org/api/timezone')
-      .then(function(r){ return r.json(); })
-      .then(function(list){
-        var found = list.find(function(z){ return z.toLowerCase().indexOf(q) !== -1; });
-        if (!found) {
-          var tokens = q.split(/[,\/\s]+/).filter(Boolean);
-          for (var i=0;i<tokens.length && !found;i++){
-            found = list.find(function(z){ return z.toLowerCase().indexOf(tokens[i]) !== -1; });
-          }
-        }
-        if (found) {
-          setResolvedTimezone(found);
-        } else {
-          alert('Could not resolve "' + input + '" to a known timezone. Try a city name (e.g. "Paris") or a timezone id like "Europe/London".');
-          $('#loc-use').text('Use this').prop('disabled',false);
-        }
-      })
-      .catch(function(err){
-        console.warn('timezone list fetch failed', err);
-        alert('Could not resolve location due to network error. You can try "Use my browser timezone" instead.');
-        $('#loc-use').text('Use this').prop('disabled',false);
-      });
-  }
-
-  function setResolvedTimezone(tz) {
-    prefs.timezone = tz;
-    localStorage.setItem(TZ_KEY, tz);
-    localStorage.setItem(STORAGE_KEY, '1');
-    $('#location-modal').hide();
-    $('#loc-use').text('Use this').prop('disabled',false);
-    reinitClock();
-  }
-
-  // settings button opens modal for changes
-  $('#settings-btn').on('click', function(){
-    $('#location-modal').show();
-    $('#loc-input').val('');
-    $('#loc-input').focus();
-  });
+  // initialize immediately (no modal/prompt)
+  reinitClock();
 
 })(jQuery);
